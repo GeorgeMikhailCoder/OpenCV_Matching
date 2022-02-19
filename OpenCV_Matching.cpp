@@ -3,7 +3,7 @@
 
 #include "OpenCV_Matching.h"
 #include<opencv2/opencv.hpp>
-
+#include<opencv2/calib3d/calib3d.hpp>
 
 using namespace cv;
 using namespace std;
@@ -54,6 +54,18 @@ vector<Point2f> cornerHarris_myShell(Mat src)
     imshow("Corners detected", dst_norm_scaled);
     return mass;
 }
+typedef std::function<double(double)> Callback;
+
+template<typename tp>
+Mat myFun(Mat m, tp(*fun)(tp))
+{
+    for (int y = 0;y<m.rows;y++)
+        for (int x = 0; x < m.cols; x++)
+        {
+            m.at<tp>(y, x) = fun(m.at<tp>(y, x));
+        }
+    return m;
+}
 
 int main()
 {
@@ -67,13 +79,28 @@ int main()
     cout << mass1 << endl;
     cout << mass2 << endl;
     Mat status, errors;
+
+    mass1.push_back(Point2f(3, 4));
     calcOpticalFlowPyrLK(im1,im2,mass1,mass2,status,errors,Size(21,21),3);
     cout << status << endl;
     cout << errors << endl;
     cout << mass2 << endl;
 
+    double minE, maxE;
+    minMaxLoc(errors, &minE, &maxE);
+    cout << "MinE = " << minE << endl;
+    cout << "MaxE = " << maxE << endl;
+
     Mat H;
+    double ransacError = maxE;
+    H = findHomography(mass1,mass2,RANSAC, ransacError,noArray(),100);
+    cout << H << endl;
     
+    auto g = [](double x) {return 2.0 * x; };
+    double (*p)(double) = g;
+    myFun(H, p);
+
+    cout << H << endl;
 
     imshow("origin", im1);
     waitKey();
