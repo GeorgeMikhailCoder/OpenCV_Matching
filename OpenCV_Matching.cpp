@@ -96,9 +96,9 @@ int main()
     H = findHomography(mass1,mass2,RANSAC, ransacError,noArray(),100);
     cout << H << endl;
     
-    auto g = [](double x) {return 2.0 * x; };
-    double (*p)(double) = g;
-    myFun(H, p);
+    //  auto g = [](double x) {return 2.0 * x; };
+    //  double (*p)(double) = g;
+    //  myFun(H, p);
 
     cout << H << endl;
 
